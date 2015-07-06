@@ -1,0 +1,26 @@
+{
+  "name": "china-map",
+  "version": "0.1.0",
+  "homepage": "https://github.com/meathill-freelance/china-map",
+  "authors": [
+    "Meathill <meathill@gmail.com>"
+  ],
+  "description": "some map app",
+  "main": "index.html",
+  "keywords": [
+    "map",
+    "svg"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "raphael": "~2.1.4"
+  }
+}
