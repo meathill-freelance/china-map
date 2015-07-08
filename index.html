@@ -3,14 +3,25 @@
 	<head>
 		<title>中国地图</title>
 		<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/screen.css">
 	</head>
 	<body>
 		<div class="container">
 			<h1>中国地图</h1>
 			<hr>
 			<div>
-				
+				<svg width="500" height="200" version="1.1" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" height="100" width="100" fill="#F00" class="interactive" />
+        </svg>
 			</div>
+      <p>
+        <img src="img/rect.svg" width="300" height="300">
+      </p>
+      <p>
+        <object type="image/svg+xml" data="img/rect.svg" class="rect" width="300" height="300">
+          rect
+        </object>
+      </p>
 		</div>
 		<script src="bower_components/raphael/raphael-min.js"></script>
 	</body>

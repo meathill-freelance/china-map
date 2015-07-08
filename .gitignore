@@ -4,3 +4,8 @@ node_modules
 
 # ide
 .settings
+.idea
+
+# build
+**/.sass-cache
+css/*.*
