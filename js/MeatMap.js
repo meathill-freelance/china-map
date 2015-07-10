@@ -23,6 +23,8 @@
       this.src.find('path').each(function (i) {
         var area = self.el.path(this.getAttribute('d'));
         area.attr('fill', '#369');
+        area.attr('stroke-width', 0);
+        area.node.setAttribute('class', 'interactive');
         self.areas.push(area);
       });
     },
