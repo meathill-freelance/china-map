@@ -1,9 +1,9 @@
 'use strict';
-(function () {
+(function ($) {
   var root = this;
 
   var config = {
-    'asset': 'img/china.svg'
+    'asset': '../img/china.svg'
   };
 
   var Map = function (options) {
@@ -16,21 +16,26 @@
 
   Map.VERSION = '{{version}}';
 
-  Map.prototype = {
+  Map.prototype = $.extend({
+    areas: [],
     render: function () {
-
+      var self = this;
+      this.src.find('path').each(function (i) {
+        var area = self.el.path(this.getAttribute('d'));
+        area.attr('fill', '#369');
+        self.areas.push(area);
+      });
     },
     loadMapSource: function () {
-      var xhr = new XMLHttpRequest();
-      xhr.onload = this.mapSource_fetchedHandler;
-      xhr.open('get', config.asset, true);
-      xhr.send();
+      $.get(config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
     },
-    mapSource_fetchedHandler: function () {
+    mapSource_fetchedHandler: function (svg) {
+      var doc = $.parseXML(svg);
+      this.src = $(doc);
       this.render();
-      this.trigger('ready', this);
+      this.emit('ready', this);
     }
-  };
+  }, EventEmitter.prototype);
 
   // 兼容CMD的导出
   if (typeof exports !== 'undefined') {
@@ -41,4 +46,4 @@
   } else {
     root.MeatMap = Map;
   }
-}.call(this));
+}.call(this, jQuery));

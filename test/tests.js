@@ -1,22 +1,20 @@
-QUnit.test('hello test', function (assert) {
-  assert.ok('1' == 1, 'passed!');
+var map = new MeatMap({
+  el: 'map'
 });
 
-QUnit.test('create map', function (assert) {
-  var map = new MeatMap({
-      el: 'map'
-    })
-    , done = assert.async();
-  map.once('ready', function () {
-    assert.ok(map.el === document.getElementsByTagName('svg')[0]);
-    done();
+map.once('ready', function () {
+  QUnit.test('create map', function (assert) {
+    assert.ok(map.el instanceof Raphael._Paper);
+    assert.ok(map.el.canvas === document.getElementsByTagName('svg')[0]);
+  });
+
+  QUnit.test('change color', function (assert) {
+
+  });
+
+  QUnit.test('zoom in area', function (assert) {
+
   });
 });
 
-QUnit.test('change color', function (assert) {
 
-});
-
-QUnit.test('zoom in area', function (assert) {
-
-});

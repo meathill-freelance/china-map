@@ -21,7 +21,9 @@
   ],
   "dependencies": {
     "bootstrap": "~3.3.5",
-    "raphael": "~2.1.4"
+    "raphael": "~2.1.4",
+    "jquery": "~2.1.4",
+    "eventemitter": "~1.0.0"
   },
   "devDependencies": {
     "qunit": "~1.18.0"
