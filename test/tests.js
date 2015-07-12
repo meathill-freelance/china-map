@@ -1,5 +1,7 @@
 var map = new MeatMap({
-  el: 'map'
+  el: 'map',
+  width: 625,
+  height: 517
 });
 
 map.once('ready', function () {

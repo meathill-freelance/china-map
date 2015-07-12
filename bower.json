@@ -26,6 +26,7 @@
     "eventemitter": "~1.0.0"
   },
   "devDependencies": {
-    "qunit": "~1.18.0"
+    "qunit": "~1.18.0",
+    "colors": "~2.2.0"
   }
 }
