@@ -1,6 +1,7 @@
 'use strict';
 (function ($) {
-  var root = this;
+  var root = this
+    , slice = Array.prototype.slice;
 
   var Map = function (options) {
     this.width = options.width;
@@ -14,6 +15,7 @@
 
   Map.prototype = $.extend({
     areas: [],
+    groups: [],
     render: function () {
       var self = this
         , area;
@@ -21,10 +23,10 @@
       this.src.find('path').each(function (i) {
         area = self.el.path(this.getAttribute('d'));
         area.attr('stroke-width', 0);
-        area.node.setAttribute('class', 'color-4' + (i < 3 ? ' bg' : ''));
         self.areas.push(area);
 
         if (i < 3) { // 前面三层是边框
+          area.node.setAttribute('class', 'color-14 bg');
           return true;
         }
         var box = area.getBBox()
@@ -36,9 +38,22 @@
           y: box.y + (box.height >> 1)
         });
         self.labels.push(label);
+
+        obj.className = obj.className || 'color-4';
+        area.node.setAttribute('class', obj.className + ' ' + obj.id + ' province');
         obj.eid = area.id;
       });
       this.labels.toFront();
+    },
+    addGroup: function (options) {
+      var province_ids = slice.call(arguments, 1)
+        , provinces = [];
+      options.id = this.groups.length;
+      for (var i = 0, len = province_ids.length; i < len; i++) {
+        provinces.push(this.src.find('province.' + province_ids[i]));
+      }
+      options.provinces = provinces;
+      this.groups.push(options);
     },
     loadMapSource: function () {
       $.get(Map.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
