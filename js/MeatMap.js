@@ -22,15 +22,13 @@
       this.labels = this.el.set();
       this.src.find('path').each(function (i) {
         area = self.el.path(this.getAttribute('d'));
-        area.attr('stroke-width', 0);
+        area.attr({
+          'stroke': '#FFF',
+          'fill': '#AAD5FF'
+        });
         self.areas.push(area);
-
-        if (i < 3) { // 前面三层是边框
-          area.node.setAttribute('class', 'color-14 bg');
-          return true;
-        }
         var box = area.getBBox()
-          , obj = Map.config.provinces[i - 3]
+          , obj = Map.config.provinces[i]
           , label = self.el.text(0, 0, obj.label)
           , lbox = label.getBBox();
         label.attr({
@@ -39,8 +37,8 @@
         });
         self.labels.push(label);
 
-        obj.className = obj.className || 'color-4';
-        area.node.setAttribute('class', obj.className + ' ' + obj.id + ' province');
+        obj.className = obj.className || 'province';
+        area.node.setAttribute('class', obj.className);
         obj.eid = area.id;
       });
       this.labels.toFront();
