@@ -21,21 +21,23 @@
         , area;
       this.labels = this.el.set();
       this.src.find('path').each(function (i) {
+        var obj = Map.config.provinces[i];
         area = self.el.path(this.getAttribute('d'));
         area.attr({
           'stroke': '#FFF',
           'fill': '#AAD5FF'
         });
         self.areas.push(area);
-        var box = area.getBBox()
-          , obj = Map.config.provinces[i]
-          , label = self.el.text(0, 0, obj.label)
-          , lbox = label.getBBox();
-        label.attr({
-          x: box.x + (box.width >> 1),
-          y: box.y + (box.height >> 1)
-        });
-        self.labels.push(label);
+
+        if (Map.config.has_label) {
+          var box = area.getBBox()
+            , label = self.el.text(0, 0, obj.label);
+          label.attr({
+            x: box.x + (box.width >> 1),
+            y: box.y + (box.height >> 1)
+          });
+          self.labels.push(label);
+        }
 
         obj.className = obj.className || 'province';
         area.node.setAttribute('class', obj.className);
@@ -52,6 +54,9 @@
       }
       options.provinces = provinces;
       this.groups.push(options);
+    },
+    setGradient: function (top, bottom, param3) {
+
     },
     loadMapSource: function () {
       $.get(Map.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');

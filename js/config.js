@@ -2,6 +2,7 @@
 (function ($, ns) {
   ns.config = {
     'asset': '../img/china.svg',
+    'has_label': false,
     'provinces': [
       {
         id: 'heilongjiang',

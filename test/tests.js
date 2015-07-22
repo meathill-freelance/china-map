@@ -16,6 +16,12 @@ map.once('ready', function () {
     assert.ok(map.el.canvas === document.getElementsByTagName('svg')[0]);
   });
 
+  QUnit.test('set color gradient', function () {
+    map.setGradient('#FF4136', '#39CCCC', {
+
+    });
+  });
+
   QUnit.test('set group', function (assert) {
     map.addGroup({
       label: '东三省',
