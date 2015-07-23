@@ -2,8 +2,8 @@ QUnit.config.reorder = false;
 
 var map = new MeatMap({
   el: 'map',
-  width: 625,
-  height: 517
+  width: 600,
+  height: 500
 });
 
 function callback(target) {
@@ -17,7 +17,7 @@ map.once('ready', function () {
   });
 
   QUnit.test('set color gradient', function () {
-    map.setGradient('#FF4136', '#39CCCC', {
+    map.setGradient(['#FF4136', '#39CCCC'], {
 
     });
   });

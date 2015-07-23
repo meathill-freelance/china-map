@@ -7,6 +7,7 @@
     this.width = options.width;
     this.height = options.height;
     this.el = Raphael(options.el, this.width, this.height);
+    this.config = _.clone(Map.config);
 
     this.loadMapSource();
   };
@@ -14,14 +15,18 @@
   Map.VERSION = '{{version}}';
 
   Map.prototype = $.extend({
-    areas: [],
+    areas: null,
     groups: [],
     render: function () {
       var self = this
+        , provinces = {}
         , area;
-      this.labels = this.el.set();
+      this.areas = this.el.set();
+      if (this.config.has_label) {
+        this.labels = this.el.set();
+      }
       this.src.find('path').each(function (i) {
-        var obj = Map.config.provinces[i];
+        var obj = self.config.provinces[i];
         area = self.el.path(this.getAttribute('d'));
         area.attr({
           'stroke': '#FFF',
@@ -29,7 +34,7 @@
         });
         self.areas.push(area);
 
-        if (Map.config.has_label) {
+        if (self.config.has_label) {
           var box = area.getBBox()
             , label = self.el.text(0, 0, obj.label);
           label.attr({
@@ -42,8 +47,12 @@
         obj.className = obj.className || 'province';
         area.node.setAttribute('class', obj.className);
         obj.eid = area.id;
+        provinces[obj.label] = obj;
       });
-      this.labels.toFront();
+      if (this.config.has_label) {
+        this.labels.toFront();
+      }
+      this.config.provinces = provinces;
     },
     addGroup: function (options) {
       var province_ids = slice.call(arguments, 1)
@@ -55,11 +64,39 @@
       options.provinces = provinces;
       this.groups.push(options);
     },
-    setGradient: function (top, bottom, param3) {
-
+    setGradient: function (colors, provinces, muted) {
+      muted = muted || this.config.colors.muted;
+      var max = _.max(provinces)
+        , min = _.min(provinces)
+        , range =  max - min
+        , colorNum = colors.length
+        , parts = 1 / (colorNum - 1);
+      if (colorNum < 2) {
+        return;
+      }
+      _.map(colors, function (color) {
+        return Raphael.color(color);
+      });
+      this.areas.attr('fill', muted);
+      _.each(provinces, function (value, key) {
+        var diff = value - min
+          , percent = diff / range
+          , index = percent / parts >> 1
+          , color1 = colors[index]
+          , color2 = colors[index + 1]
+          , color  = {};
+        color.r = this.getBetweenColor(color2.r, color1.r, percent);
+        color.g = this.getBetweenColor(color2.g, color1.g, percent);
+        color.b = this.getBetweenColor(color2.b, color1,b, percent);
+        this.areas.get(this.config.provinces[key].eid).attr(Raphael.rgb(color.r, color.g, color.b));
+      }, this);
+    },
+    getBetweenColor: function (a, b, percent) {
+      var min = a > b ? b : a;
+      return Math.abs(a - b) * percent + min;
     },
     loadMapSource: function () {
-      $.get(Map.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
+      $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
     },
     mapSource_fetchedHandler: function (svg) {
       var doc = $.parseXML(svg);
