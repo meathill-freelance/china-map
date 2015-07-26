@@ -44,8 +44,7 @@
           self.labels.push(label);
         }
 
-        obj.className = obj.className || 'province';
-        area.node.setAttribute('class', obj.className);
+        area.node.setAttribute('class', [obj.id, 'province', 'area'].join(' '));
         obj.eid = area.id;
         provinces[obj.id] = obj;
       });
@@ -64,8 +63,7 @@
       options.provinces = provinces;
       this.groups.push(options);
     },
-    setGradient: function (colors, provinces, muted) {
-      muted = muted || this.config.colors.muted;
+    setGradient: function (colors, provinces, has_bar) {
       var max = _.max(provinces)
         , min = _.min(provinces)
         , range =  max - min
@@ -74,10 +72,23 @@
       if (colorNum < 2) {
         return;
       }
-      colors = _.map(colors.reverse(), function (color) {
+      colors.reverse();
+      if (has_bar) {
+        this.el.setStart();
+        var bar = this.el.rect(this.width - 20, this.height - 180, 20, 160);
+        bar.attr({
+          fill: '90-' + colors.join('-'),
+          stroke: 0
+        });
+        this.el.text(this.width, this.height - 190, max)
+        this.el.text(this.width, this.height - 10, min);
+        this.colorBar = this.el.setFinish();
+        this.colorBar.attr('text-anchor', 'end');
+      }
+      colors = _.map(colors, function (color) {
         return Raphael.color(color);
       });
-      this.areas.attr('fill', muted);
+      this.areas.attr('fill', this.config.colors.muted);
       _.each(provinces, function (value, key) {
         var diff = value - min
           , percent = diff / range
