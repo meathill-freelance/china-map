@@ -33,7 +33,7 @@ map.once('ready', function () {
     }, true);
     assert.ok(map.el.getById(0).attr('fill') === '#DDD');
     assert.ok(map.el.getById(map.config.provinces['beijing'].eid).attr('fill') === '#cc0000');
-    assert.ok(map.el.getById(map.config.provinces['jiangxi'].eid).attr('fill') === '#ff9999')
+    assert.ok(map.el.getById(map.config.provinces['jiangxi'].eid).attr('fill') === '#ff9999');
     assert.ok(map.el.getById(map.config.provinces['shanghai'].eid).attr('fill') === '#ffdc00');
   });
 
@@ -45,6 +45,6 @@ map.once('ready', function () {
   });
 
   QUnit.test('show label', function (assert) {
-
+    assert.ok($('.meat-map-tip').length === 0);
   });
 });

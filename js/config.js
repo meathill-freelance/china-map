@@ -3,6 +3,8 @@
   ns.config = {
     'asset': '../img/china.svg',
     'has_label': false,
+    'has_tip': true,
+    'tip_template': '{{label}}{{#if num}} {{num}}{{/if}}',
     'colors': {
       aqua: '#7FDBFF',
       blue: '#0074D9',

@@ -3,6 +3,31 @@
   var root = this
     , slice = Array.prototype.slice;
 
+  function Tip() {
+    this.$el = $('<div class="meat-map-tip"></div>');
+  }
+
+  Tip.prototype = {
+    remove: function () {
+      this.$el.remove();
+    },
+    setContent: function (content) {
+      this.$el.html(content);
+      return this;
+    },
+    setPosition: function (event) {
+      this.$el.css({
+        left: event.clientX - this.$el.outerWidth() / 2,
+        top: event.clientY - this.$el.outerHeight() - 5
+      });
+      return this;
+    },
+    show: function (event) {
+      this.$el.appendTo('body');
+      return this.setPosition(event);
+    }
+  };
+
   var Map = function (options) {
     this.width = options.width;
     this.height = options.height;
@@ -10,6 +35,7 @@
     this.config = _.clone(Map.config);
 
     this.loadMapSource();
+    this.delegateEvents();
   };
 
   Map.VERSION = '{{version}}';
@@ -33,6 +59,12 @@
           'fill': '#AAD5FF'
         });
         self.areas.push(area);
+        if (self.config.has_tip) {
+          self.tipTemplate = Handlebars.compile(self.config.tip_template);
+          area.mousemove(_.bind(self.area_mouseMoveHandler, self));
+          area.mouseover(_.bind(self.area_mouseOverHandler, self));
+          area.mouseout(_.bind(self.area_mouseOutHandler, self));
+        }
 
         if (self.config.has_label) {
           var box = area.getBBox()
@@ -62,6 +94,20 @@
       }
       options.provinces = provinces;
       this.groups.push(options);
+    },
+    createTip: function () {
+      return new Tip();
+    },
+    delegateEvents: function () {
+      $(this.el.node).on('click', function (event) {
+        console.log(event.target, event.originalEvent.target);
+      });
+    },
+    getBetweenColor: function (a, b, percent) {
+      return (a - b) * percent + b >> 0;
+    },
+    loadMapSource: function () {
+      $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
     },
     setGradient: function (colors, provinces, has_bar) {
       var max = _.max(provinces)
@@ -104,14 +150,23 @@
           color.g = this.getBetweenColor(color2.g, color1.g, percent);
           color.b = this.getBetweenColor(color2.b, color1.b, percent);
         }
+        this.config.provinces[key].num = value;
         this.el.getById(this.config.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
       }, this);
     },
-    getBetweenColor: function (a, b, percent) {
-      return (a - b) * percent + b >> 0;
+    area_mouseMoveHandler: function (event) {
+      this.tip.setPosition(event);
     },
-    loadMapSource: function () {
-      $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
+    area_mouseOverHandler: function (event) {
+      var province = event.target.classList[0]
+        , data = this.config.provinces[province];
+      this.tip = this.tip || this.createTip();
+      this.tip
+        .setContent(this.tipTemplate(data))
+        .show(event);
+    },
+    area_mouseOutHandler: function () {
+      this.tip.remove();
     },
     mapSource_fetchedHandler: function (svg) {
       var doc = $.parseXML(svg);
