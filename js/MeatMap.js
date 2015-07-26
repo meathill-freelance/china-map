@@ -47,7 +47,7 @@
         obj.className = obj.className || 'province';
         area.node.setAttribute('class', obj.className);
         obj.eid = area.id;
-        provinces[obj.label] = obj;
+        provinces[obj.id] = obj;
       });
       if (this.config.has_label) {
         this.labels.toFront();
@@ -74,26 +74,30 @@
       if (colorNum < 2) {
         return;
       }
-      _.map(colors, function (color) {
+      colors = _.map(colors.reverse(), function (color) {
         return Raphael.color(color);
       });
       this.areas.attr('fill', muted);
       _.each(provinces, function (value, key) {
         var diff = value - min
           , percent = diff / range
-          , index = percent / parts >> 1
+          , index = percent / parts >> 0
           , color1 = colors[index]
           , color2 = colors[index + 1]
           , color  = {};
-        color.r = this.getBetweenColor(color2.r, color1.r, percent);
-        color.g = this.getBetweenColor(color2.g, color1.g, percent);
-        color.b = this.getBetweenColor(color2.b, color1,b, percent);
-        this.areas.get(this.config.provinces[key].eid).attr(Raphael.rgb(color.r, color.g, color.b));
+        if (!color2) {
+          color = color1;
+        } else {
+          percent = percent % parts / parts;
+          color.r = this.getBetweenColor(color2.r, color1.r, percent);
+          color.g = this.getBetweenColor(color2.g, color1.g, percent);
+          color.b = this.getBetweenColor(color2.b, color1.b, percent);
+        }
+        this.el.getById(this.config.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
       }, this);
     },
     getBetweenColor: function (a, b, percent) {
-      var min = a > b ? b : a;
-      return Math.abs(a - b) * percent + min;
+      return (a - b) * percent + b >> 0;
     },
     loadMapSource: function () {
       $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
