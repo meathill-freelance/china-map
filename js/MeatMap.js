@@ -87,13 +87,11 @@
     },
     addGroup: function (options) {
       var province_ids = slice.call(arguments, 1)
-        , provinces = [];
-      options.id = this.groups.length;
-      for (var i = 0, len = province_ids.length; i < len; i++) {
-        provinces.push(this.src.find('province.' + province_ids[i]));
-      }
-      options.provinces = provinces;
-      this.groups.push(options);
+        , provinces = this.el.set();
+      _.map(province_ids, function (id) {
+        provinces.push(this.el.getById(this.config.provinces[id].eid));
+      }, this);
+      provinces.attr('fill', options.color);
     },
     createTip: function () {
       return new Tip();

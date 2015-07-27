@@ -40,8 +40,12 @@ map.once('ready', function () {
   QUnit.test('set group', function (assert) {
     map.addGroup({
       label: '东三省',
-      className: 'color-2'
-    }, 'heilongjiang', 'liaoning', 'shenyang');
+      className: 'dongbei',
+      color: '#85144B'
+    }, 'heilongjiang', 'liaoning', 'jilin');
+    assert.ok(map.el.getById(map.config.provinces['heilongjiang'].eid).attr('fill') === '#85144B');
+    assert.ok(map.el.getById(map.config.provinces['liaoning'].eid).attr('fill') === '#85144B');
+    assert.ok(map.el.getById(map.config.provinces['jilin'].eid).attr('fill') === '#85144B');
   });
 
   QUnit.test('show label', function (assert) {
