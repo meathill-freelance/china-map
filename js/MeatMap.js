@@ -59,12 +59,6 @@
           'fill': '#AAD5FF'
         });
         self.areas.push(area);
-        if (self.config.has_tip) {
-          self.tipTemplate = Handlebars.compile(self.config.tip_template);
-          area.mousemove(_.bind(self.area_mouseMoveHandler, self));
-          area.mouseover(_.bind(self.area_mouseOverHandler, self));
-          area.mouseout(_.bind(self.area_mouseOutHandler, self));
-        }
 
         if (self.config.has_label) {
           var box = area.getBBox()
@@ -83,23 +77,32 @@
       if (this.config.has_label) {
         this.labels.toFront();
       }
-      this.config.provinces = provinces;
+      this.provinces = provinces;
     },
     addGroup: function (options) {
       var province_ids = slice.call(arguments, 1)
         , provinces = this.el.set();
       _.map(province_ids, function (id) {
-        provinces.push(this.el.getById(this.config.provinces[id].eid));
+        provinces.push(this.el.getById(this.provinces[id].eid));
       }, this);
       provinces.attr('fill', options.color);
+      if (options.parent) {
+        provinces.parent = options.parent;
+      }
+      this.groups.push(provinces);
     },
     createTip: function () {
       return new Tip();
     },
     delegateEvents: function () {
-      $(this.el.node).on('click', function (event) {
-        console.log(event.target, event.originalEvent.target);
-      });
+      if (this.config.has_tip) {
+        this.tipTemplate = Handlebars.compile(this.config.tip_template);
+        $(this.el.canvas)
+          .on('click', 'path', _.bind(this.area_clickHandler, this))
+          .on('mousemove', 'path', _.bind(this.area_mouseMoveHandler, this))
+          .on('mouseover', 'path', _.bind(this.area_mouseOverHandler, this))
+          .on('mouseout', 'path', _.bind(this.area_mouseOutHandler, this));
+      }
     },
     getBetweenColor: function (a, b, percent) {
       return (a - b) * percent + b >> 0;
@@ -148,16 +151,19 @@
           color.g = this.getBetweenColor(color2.g, color1.g, percent);
           color.b = this.getBetweenColor(color2.b, color1.b, percent);
         }
-        this.config.provinces[key].num = value;
-        this.el.getById(this.config.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
+        this.provinces[key].num = value;
+        this.el.getById(this.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
       }, this);
+    },
+    area_clickHandler: function () {
+
     },
     area_mouseMoveHandler: function (event) {
       this.tip.setPosition(event);
     },
     area_mouseOverHandler: function (event) {
       var province = event.target.classList[0]
-        , data = this.config.provinces[province];
+        , data = this.provinces[province];
       this.tip = this.tip || this.createTip();
       this.tip
         .setContent(this.tipTemplate(data))

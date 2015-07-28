@@ -32,9 +32,9 @@ map.once('ready', function () {
       shanghai: 500
     }, true);
     assert.ok(map.el.getById(0).attr('fill') === '#DDD');
-    assert.ok(map.el.getById(map.config.provinces['beijing'].eid).attr('fill') === '#cc0000');
-    assert.ok(map.el.getById(map.config.provinces['jiangxi'].eid).attr('fill') === '#ff9999');
-    assert.ok(map.el.getById(map.config.provinces['shanghai'].eid).attr('fill') === '#ffdc00');
+    assert.ok(map.el.getById(map.provinces['beijing'].eid).attr('fill') === '#cc0000');
+    assert.ok(map.el.getById(map.provinces['jiangxi'].eid).attr('fill') === '#ff9999');
+    assert.ok(map.el.getById(map.provinces['shanghai'].eid).attr('fill') === '#ffdc00');
   });
 
   QUnit.test('set group', function (assert) {
@@ -43,9 +43,9 @@ map.once('ready', function () {
       className: 'dongbei',
       color: '#85144B'
     }, 'heilongjiang', 'liaoning', 'jilin');
-    assert.ok(map.el.getById(map.config.provinces['heilongjiang'].eid).attr('fill') === '#85144B');
-    assert.ok(map.el.getById(map.config.provinces['liaoning'].eid).attr('fill') === '#85144B');
-    assert.ok(map.el.getById(map.config.provinces['jilin'].eid).attr('fill') === '#85144B');
+    assert.ok(map.el.getById(map.provinces['heilongjiang'].eid).attr('fill') === '#85144B');
+    assert.ok(map.el.getById(map.provinces['liaoning'].eid).attr('fill') === '#85144B');
+    assert.ok(map.el.getById(map.provinces['jilin'].eid).attr('fill') === '#85144B');
   });
 
   QUnit.test('show label', function (assert) {
