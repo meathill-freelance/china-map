@@ -38,11 +38,16 @@ map.once('ready', function () {
   });
 
   QUnit.test('set group', function (assert) {
-    map.addGroup({
-      label: '东三省',
-      className: 'dongbei',
-      color: '#85144B'
-    }, 'heilongjiang', 'liaoning', 'jilin');
+    var dongbei = map.addGroup({
+        label: '大东北',
+        fill: '#85144B'
+      }, 'heilongjiang', 'liaoning', 'jilin', 'neimenggu')
+      , dongsan = map.addGroup({
+        label: '东三省',
+        parent: dongbei,
+        fill: '#3D9970'
+      }, 'heilongjiang', 'liaoning', 'jilin');
+
     assert.ok(map.el.getById(map.provinces['heilongjiang'].eid).attr('fill') === '#85144B');
     assert.ok(map.el.getById(map.provinces['liaoning'].eid).attr('fill') === '#85144B');
     assert.ok(map.el.getById(map.provinces['jilin'].eid).attr('fill') === '#85144B');

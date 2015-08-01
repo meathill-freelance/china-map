@@ -85,11 +85,20 @@
       _.map(province_ids, function (id) {
         provinces.push(this.el.getById(this.provinces[id].eid));
       }, this);
-      provinces.attr('fill', options.color);
-      if (options.parent) {
-        provinces.parent = options.parent;
+      if (!options.parent) {
+        provinces.attr(options);
       }
+      provinces.options = options;
       this.groups.push(provinces);
+      return provinces;
+    },
+    createMask: function () {
+      var mask = this.el.rect(0, 0, this.width, this.height);
+      mask.attr({
+        fill: '#000',
+        opacity: 0.8
+      });
+      return mask;
     },
     createTip: function () {
       return new Tip();
@@ -98,11 +107,24 @@
       if (this.config.has_tip) {
         this.tipTemplate = Handlebars.compile(this.config.tip_template);
         $(this.el.canvas)
-          .on('click', 'path', _.bind(this.area_clickHandler, this))
+          .on('click', 'path,rect', _.bind(this.area_clickHandler, this))
           .on('mousemove', 'path', _.bind(this.area_mouseMoveHandler, this))
           .on('mouseover', 'path', _.bind(this.area_mouseOverHandler, this))
           .on('mouseout', 'path', _.bind(this.area_mouseOutHandler, this));
       }
+    },
+    findGroup: function (target) {
+      return _.find(this.groups, function (group) {
+        if (this.group === group) {
+          return false;
+        }
+        for (var i = 0, len = group.length; i < len; i++) {
+          if (group[i].node === target) {
+            return true;
+          }
+        }
+        return false;
+      }, this);
     },
     getBetweenColor: function (a, b, percent) {
       return (a - b) * percent + b >> 0;
@@ -127,7 +149,7 @@
           fill: '90-' + colors.join('-'),
           stroke: 0
         });
-        this.el.text(this.width, this.height - 190, max)
+        this.el.text(this.width, this.height - 190, max);
         this.el.text(this.width, this.height - 10, min);
         this.colorBar = this.el.setFinish();
         this.colorBar.attr('text-anchor', 'end');
@@ -155,15 +177,54 @@
         this.el.getById(this.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
       }, this);
     },
-    area_clickHandler: function () {
+    area_clickHandler: function (event) {
+      var box;
+      if (this.mask && event.target === this.mask.node && this.group) {
+        var parent = this.group.options.parent;
+        if (parent) {
+          box = parent.getBBox();
+          this.el.setViewBox(box.x, box.y, box.width, box.height);
+          parent.toFront();
+          this.group = parent;
+        } else {
+          this.el.setViewBox(0, 0, this.width, this.height);
+          this.mask.hide();
+          this.group = null;
+        }
+        return true;
+      }
 
+      var group = this.group = this.findGroup(event.target);
+      if (group) {
+        box = group.getBBox();
+        this.el.setViewBox(box.x, box.y, box.width, box.height, true);
+        this.mask = this.mask || this.createMask();
+        this.mask.show();
+        this.mask.toFront();
+        group.toFront();
+        _.chain(this.groups)
+          .filter(function (item) {
+            return item.options.parent === group
+          })
+          .each(function (group) {
+            group.attr(group.options);
+          });
+      }
     },
     area_mouseMoveHandler: function (event) {
       this.tip.setPosition(event);
     },
     area_mouseOverHandler: function (event) {
-      var province = event.target.classList[0]
-        , data = this.provinces[province];
+      // 先判断是不是在区域里
+      var target = event.target
+        , data
+        , group = this.findGroup(target);
+      if (group) {
+        data = group.options;
+      } else {
+        var province = target.classList[0];
+        data = this.provinces[province];
+      }
       this.tip = this.tip || this.createTip();
       this.tip
         .setContent(this.tipTemplate(data))

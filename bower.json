@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "qunit": "~1.18.0",
-    "colors": "~2.2.0"
+    "colors": "~2.2.0",
+    "bootstrap": "~3.3.5"
   }
 }
