@@ -78,6 +78,7 @@
         this.labels.toFront();
       }
       this.provinces = provinces;
+      this.fit();
     },
     addGroup: function (options) {
       var province_ids = slice.call(arguments, 1)
@@ -125,6 +126,10 @@
         }
         return false;
       }, this);
+    },
+    fit: function () {
+      var box = this.areas.getBBox();
+      this.el.setViewBox(0, 0, box.width, box.height);
     },
     getBetweenColor: function (a, b, percent) {
       return (a - b) * percent + b >> 0;
@@ -187,7 +192,7 @@
           parent.toFront();
           this.group = parent;
         } else {
-          this.el.setViewBox(0, 0, this.width, this.height);
+          this.fit();
           this.mask.hide();
           this.group = null;
         }
