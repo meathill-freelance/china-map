@@ -22,13 +22,12 @@
   "dependencies": {
     "raphael": "~2.1.4",
     "jquery": "~2.1.4",
-    "eventemitter": "~1.0.0",
-    "underscore": "~1.8.3",
-    "handlebars": "~3.0.3"
+    "underscore": "~1.8.3"
   },
   "devDependencies": {
     "qunit": "~1.18.0",
     "colors": "~2.2.0",
-    "bootstrap": "~3.3.5"
+    "bootstrap": "~3.3.5",
+    "handlebars": "~3.0.3"
   }
 }

@@ -2,9 +2,10 @@
 (function ($, ns) {
   ns.config = {
     'asset': '../img/china.svg',
+    'className': 'china-map',
     'has_label': false,
     'has_tip': true,
-    'tip_template': '{{label}}{{#if num}} {{num}}{{/if}}',
+    'tip_template': '{label}',
     'colors': {
       aqua: '#7FDBFF',
       blue: '#0074D9',

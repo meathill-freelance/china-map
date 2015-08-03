@@ -1,7 +1,8 @@
 'use strict';
 (function ($) {
   var root = this
-    , slice = Array.prototype.slice;
+    , slice = Array.prototype.slice
+    , eve = Raphael.eve;
 
   function Tip() {
     this.$el = $('<div class="meat-map-tip"></div>');
@@ -33,6 +34,7 @@
     this.height = options.height;
     this.el = Raphael(options.el, this.width, this.height);
     this.config = _.clone(Map.config);
+    document.getElementById(options.el).classList.add(this.config.className);
 
     this.loadMapSource();
     this.delegateEvents();
@@ -40,7 +42,7 @@
 
   Map.VERSION = '{{version}}';
 
-  Map.prototype = $.extend({
+  Map.prototype = {
     areas: null,
     groups: [],
     render: function () {
@@ -106,7 +108,6 @@
     },
     delegateEvents: function () {
       if (this.config.has_tip) {
-        this.tipTemplate = Handlebars.compile(this.config.tip_template);
         $(this.el.canvas)
           .on('click', 'path,rect', _.bind(this.area_clickHandler, this))
           .on('mousemove', 'path', _.bind(this.area_mouseMoveHandler, this))
@@ -149,13 +150,14 @@
       colors.reverse();
       if (has_bar) {
         this.el.setStart();
-        var bar = this.el.rect(this.width - 20, this.height - 180, 20, 160);
+        var box = this.areas.getBBox()
+          , bar = this.el.rect(box.width - 20, box.height - 180, 20, 160);
         bar.attr({
           fill: '90-' + colors.join('-'),
           stroke: 0
         });
-        this.el.text(this.width, this.height - 190, max);
-        this.el.text(this.width, this.height - 10, min);
+        this.el.text(box.width, box.height - 190, max);
+        this.el.text(box.width, box.height - 10, min);
         this.colorBar = this.el.setFinish();
         this.colorBar.attr('text-anchor', 'end');
       }
@@ -179,11 +181,22 @@
           color.b = this.getBetweenColor(color2.b, color1.b, percent);
         }
         this.provinces[key].num = value;
+        this.provinces[key].color = Raphael.rgb(color.r, color.g, color.b);
         this.el.getById(this.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
       }, this);
     },
+    off: function (event, handler) {
+      eve.off(event, handler);
+    },
+    on: function (event, handler) {
+      eve.on(event, handler);
+    },
+    once: function (event, handler) {
+      eve.on(event, handler);
+    },
     area_clickHandler: function (event) {
       var box;
+      // 点击了黑色蒙版
       if (this.mask && event.target === this.mask.node && this.group) {
         var parent = this.group.options.parent;
         if (parent) {
@@ -199,6 +212,7 @@
         return true;
       }
 
+      // 点击了某个大组
       var group = this.group = this.findGroup(event.target);
       if (group) {
         box = group.getBBox();
@@ -214,6 +228,14 @@
           .each(function (group) {
             group.attr(group.options);
           });
+        return true;
+      }
+
+      // 都不是，点击了某个省份
+      var province = event.target.classList[0]
+        , href = this.provinces[province].href;
+      if (href) {
+        window.open(href);
       }
     },
     area_mouseMoveHandler: function (event) {
@@ -232,7 +254,7 @@
       }
       this.tip = this.tip || this.createTip();
       this.tip
-        .setContent(this.tipTemplate(data))
+        .setContent(Raphael.fullfill(this.config.tip_template, data))
         .show(event);
     },
     area_mouseOutHandler: function () {
@@ -242,9 +264,9 @@
       var doc = $.parseXML(svg);
       this.src = $(doc);
       this.render();
-      this.emit('ready', this);
+      eve('ready', this);
     }
-  }, EventEmitter.prototype);
+  };
 
   // 兼容CMD的导出
   if (typeof exports !== 'undefined') {

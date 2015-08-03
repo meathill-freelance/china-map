@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>中国地图范例 - 图示</title>
+  <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/standalone.css">
+  <style>
+    .alert {
+      color: #FFF;
+      margin-bottom: 0;
+    }
+    #legend {
+      text-align: center;
+    }
+    #legend p {
+      line-height: 2em;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="col-md-8" id="map-container"></div>
+  <div class="col-md-4">
+    <div class="row" id="legend">
+      <script type="text/x-handlebars-template">
+        {{#each provinces}}
+        <div class="col-md-4">
+          <div class="alert" style="background-color:{{color}}">{{num}}</div>
+          <p>{{label}}</p>
+        </div>
+        {{/each}}
+      </script>
+    </div>
+  </div>
+</div>
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../bower_components/raphael/raphael-min.js"></script>
+<script src="../bower_components/underscore/underscore-min.js"></script>
+<script src="../bower_components/handlebars/handlebars.min.js"></script>
+<script src="../js/MeatMap.js"></script>
+<script src="../js/config.js"></script>
+<script>
+  MeatMap.config.tip_template = '{label} <br> 数量：{num}';
+  var map = new MeatMap({
+      el: 'map-container',
+      width: 600,
+      height: 500
+    })
+    , nums = {
+      beijing: 10500,
+      tianjin: 9000,
+      henan: 8000,
+      hebei: 7000,
+      hubei: 6000,
+      jiangxi: 5500,
+      hunan: 5000,
+      guangdong: 4000,
+      fujian: 3000,
+      anhui: 2000,
+      taiwan: 1000,
+      shanghai: 500
+    };
+  map.once('ready', function () {
+    map.setGradient(['#CC0000', '#FF9999', '#FFDC00'], nums, true);
+    console.log(map.provinces);
+    nums = _.map(nums, function (num, province) {
+      return {
+        num: num,
+        color: map.provinces[province].color,
+        label: map.provinces[province].label
+      };
+    });
+    var template = $('[type="text/x-handlebars-template"]').html();
+    template = Handlebars.compile(template);
+    $('#legend').html(template({provinces: nums}));
+  });
+
+</script>
+</body>
+</html>
