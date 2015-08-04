@@ -135,6 +135,15 @@
     getBetweenColor: function (a, b, percent) {
       return (a - b) * percent + b >> 0;
     },
+    highlight: function (province) {
+      province = this.el.getById(this.provinces[province].eid);
+      province.toFront();
+      return province.glow({
+        color: '#FFF',
+        width: 16,
+        opacity: 0.75
+      });
+    },
     loadMapSource: function () {
       $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
     },

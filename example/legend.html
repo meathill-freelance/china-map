@@ -25,7 +25,7 @@
     <div class="row" id="legend">
       <script type="text/x-handlebars-template">
         {{#each provinces}}
-        <div class="col-md-4">
+        <div class="col-md-4" id="{{province}}">
           <div class="alert" style="background-color:{{color}}">{{num}}</div>
           <p>{{label}}</p>
         </div>
@@ -67,13 +67,25 @@
     nums = _.map(nums, function (num, province) {
       return {
         num: num,
+        province: province,
         color: map.provinces[province].color,
         label: map.provinces[province].label
       };
     });
     var template = $('[type="text/x-handlebars-template"]').html();
     template = Handlebars.compile(template);
-    $('#legend').html(template({provinces: nums}));
+    $('#legend')
+      .html(template({provinces: nums}))
+      .on('mouseover', '.col-md-4', function (event) {
+        var province = event.currentTarget.id;
+        event.currentTarget.glow = map.highlight(province);
+      })
+      .on('mouseout', '.col-md-4', function (event) {
+        if (event.currentTarget.glow) {
+          event.currentTarget.glow.remove();
+          event.currentTarget.glow = null;
+        }
+      });
   });
 
 </script>
