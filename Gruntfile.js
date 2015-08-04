@@ -2,11 +2,14 @@
  * Created by meathill on 15/8/2.
  */
 module.exports = function (grunt) {
-  var dist = 'dist/';
+  var dist = 'dist/'
+    , temp = 'temp/';
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     clean: {
-      target: [dist]
+      start: [temp, dist],
+      end: [temp]
     },
     compass: {
       target: {
@@ -23,26 +26,38 @@ module.exports = function (grunt) {
             dest: dist + 'css/'
           }
         ]
-      }
-    },
-    cssmin: {
-      target: {
-        files: [{
-          expand: true,
-          cwd: dist + 'css/',
-          src: ['*.css', '!*.min.css'],
-          dest: dist + 'css/',
-          ext: '.min.css'
-        }]
+      },
+      wrap: {
+        src: 'js/wrapper.js',
+        dest: dist + 'js/MeatMap.js',
+        options: {
+          process: function (content, path) {
+            var code = grunt.file.read(temp + 'class.js');
+            content = content.replace('{{version}}', grunt.config.get('pkg').version);
+            return content.replace('/* -- js content here -- */', code);
+          }
+        }
       }
     },
     concat: {
       options: {
-        separator: ';'
+        separator: ';\n',
+        banner: "'use strict';\n",
+        process: function(src, filepath) {
+          return '// Source: ' + filepath + '\n' +
+            src.replace(/(^|\n)[ \t]*('use strict'|"use strict");?\s*/g, '$1');
+        },
+        stripBanners: true
       },
       js: {
-        src: ['js/MeatMap.js', 'js/config.js'],
-        dest: dist + 'js/MeatMap.js'
+        src: [
+          'js/utils.js',
+          'js/Tip.js',
+          'js/MeatMap.js',
+          'js/config.js',
+          'js/event.js'
+        ],
+        dest: temp + 'class.js'
       }
     },
     uglify: {
@@ -60,16 +75,16 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compass');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('default', [
-    'clean',
+    'clean:start',
     'compass',
-    'copy',
-    'cssmin',
+    'copy:css',
     'concat',
-    'uglify'
+    'copy:wrap',
+    'uglify',
+    'clean:end'
   ]);
 };
