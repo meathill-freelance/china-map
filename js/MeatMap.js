@@ -203,6 +203,12 @@
     once: function (event, handler) {
       eve.on(event, handler);
     },
+    mouseover: function (handler) {
+      eve.on('mouseover', handler);
+    },
+    mouseout: function (handler) {
+      eve.on('mouseout', handler);
+    },
     area_clickHandler: function (event) {
       var box;
       // 点击了黑色蒙版
@@ -265,9 +271,11 @@
       this.tip
         .setContent(Raphael.fullfill(this.config.tip_template, data))
         .show(event);
+      eve('mouseover', this, data);
     },
     area_mouseOutHandler: function () {
       this.tip.remove();
+      eve('mouseout', this);
     },
     mapSource_fetchedHandler: function (svg) {
       var doc = $.parseXML(svg);

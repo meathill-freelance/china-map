@@ -13,8 +13,21 @@
     #legend {
       text-align: center;
     }
+    #legend .col-md-4 {
+      padding-top: 10px;
+    }
     #legend p {
-      line-height: 2em;
+      line-height: 3em;
+      margin-bottom: 0;
+    }
+    #legend .active {
+      background-color: #CCC;
+      border-radius: 8px;
+    }
+    #legend .active p {
+      font-size: 1.25em;
+      font-weight: bold;
+      line-height: 2.4em;
     }
   </style>
 </head>
@@ -86,6 +99,12 @@
           event.currentTarget.glow = null;
         }
       });
+    map.mouseover(function (province) {
+      $('#' + province.id).addClass('active');
+    });
+    map.mouseout(function () {
+      $('.active').removeClass('active');
+    })
   });
 
 </script>
