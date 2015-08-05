@@ -64,6 +64,19 @@ Map.prototype = {
     this.groups.push(provinces);
     return provinces;
   },
+  createColorBar: function (colors, max, min) {
+    this.el.setStart();
+    var box = this.areas.getBBox()
+      , bar = this.el.rect(box.width - 20, box.height - 180, 20, 160);
+    bar.attr({
+      fill: '90-' + colors.join('-'),
+      stroke: 0
+    });
+    this.el.text(box.width, box.height - 190, max);
+    this.el.text(box.width, box.height - 10, min);
+    this.colorBar = this.el.setFinish();
+    this.colorBar.attr('text-anchor', 'end');
+  },
   createMask: function () {
     var mask = this.el.rect(0, 0, this.width, this.height);
     mask.attr({
@@ -114,8 +127,8 @@ Map.prototype = {
     $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
   },
   setGradient: function (colors, provinces, has_bar) {
-    var max = _.max(provinces)
-      , min = _.min(provinces)
+    var max = _.max(provinces, getNum)
+      , min = _.min(provinces, getNum)
       , range =  max - min
       , colorNum = colors.length
       , parts = 1 / (colorNum - 1);
@@ -124,24 +137,15 @@ Map.prototype = {
     }
     colors.reverse();
     if (has_bar) {
-      this.el.setStart();
-      var box = this.areas.getBBox()
-        , bar = this.el.rect(box.width - 20, box.height - 180, 20, 160);
-      bar.attr({
-        fill: '90-' + colors.join('-'),
-        stroke: 0
-      });
-      this.el.text(box.width, box.height - 190, max);
-      this.el.text(box.width, box.height - 10, min);
-      this.colorBar = this.el.setFinish();
-      this.colorBar.attr('text-anchor', 'end');
+      this.createColorBar(colors, max, min);
     }
     colors = _.map(colors, function (color) {
       return Raphael.color(color);
     });
     this.areas.attr('fill', this.config.colors.muted);
     _.each(provinces, function (value, key) {
-      var diff = value - min
+      var num = getNum(value)
+        , diff = num - min
         , percent = diff / range
         , index = percent / parts >> 0
         , color1 = colors[index]
@@ -155,9 +159,15 @@ Map.prototype = {
         color.g = getBetweenColor(color2.g, color1.g, percent);
         color.b = getBetweenColor(color2.b, color1.b, percent);
       }
-      this.provinces[key].num = value;
-      this.provinces[key].color = Raphael.rgb(color.r, color.g, color.b);
-      this.el.getById(this.provinces[key].eid).attr('fill', Raphael.rgb(color.r, color.g, color.b));
+      color = Raphael.rgb(color.r, color.g, color.b);
+      if (isNaN(value)) {
+        value.fill = color;
+        this.addGroup(value);
+      } else {
+        this.provinces[key].num = value;
+        this.provinces[key].color = color;
+        this.el.getById(this.provinces[key].eid).attr('fill', color);
+      }
     }, this);
   },
   area_clickHandler: function (event) {

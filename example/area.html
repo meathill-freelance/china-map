@@ -52,8 +52,7 @@
 <script src="../bower_components/raphael/raphael-min.js"></script>
 <script src="../bower_components/underscore/underscore-min.js"></script>
 <script src="../bower_components/handlebars/handlebars.min.js"></script>
-<script src="../js/MeatMap.js"></script>
-<script src="../js/config.js"></script>
+<script src="../dist/js/MeatMap.js"></script>
 <script>
   MeatMap.config.tip_template = '{label} <br> 数量：{num}';
   var map = new MeatMap({
@@ -87,6 +86,9 @@
     map.setGradient(['#CC0000', '#FF9999', '#FFDC00'], nums, true);
     console.log(map.provinces);
     nums = _.map(nums, function (num, province) {
+      if (isNaN(num)) {
+        return true;
+      }
       return {
         num: num,
         province: province,
