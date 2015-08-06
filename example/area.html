@@ -52,16 +52,20 @@
 <script src="../bower_components/raphael/raphael-min.js"></script>
 <script src="../bower_components/underscore/underscore-min.js"></script>
 <script src="../bower_components/handlebars/handlebars.min.js"></script>
-<script src="../dist/js/MeatMap.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/MeatMap.js"></script>
+<script src="../js/Tip.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/event.js"></script>
 <script>
-  MeatMap.config.tip_template = '{label} <br> 数量：{num}';
-  var map = new MeatMap({
+  Map.config.tip_template = '{label} <br> 数量：{num}';
+  var map = new Map({
       el: 'map-container',
       width: 600,
       height: 500
     })
     , nums = {
-      'dongbeidaqu': {
+      '东三省': {
         num: 25050,
         provinces: {
           heilongjiang: 12500,

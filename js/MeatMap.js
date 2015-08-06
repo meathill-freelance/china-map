@@ -52,7 +52,7 @@ Map.prototype = {
     this.fit();
   },
   addGroup: function (options) {
-    var province_ids = slice.call(arguments, 1)
+    var province_ids = _.flatten(slice.call(arguments, 1))
       , provinces = this.el.set();
     _.map(province_ids, function (id) {
       provinces.push(this.el.getById(this.provinces[id].eid));
@@ -69,7 +69,7 @@ Map.prototype = {
     var box = this.areas.getBBox()
       , bar = this.el.rect(box.width - 20, box.height - 180, 20, 160);
     bar.attr({
-      fill: '90-' + colors.join('-'),
+      fill: '270-' + colors.join('-'),
       stroke: 0
     });
     this.el.text(box.width, box.height - 190, max);
@@ -127,46 +127,25 @@ Map.prototype = {
     $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
   },
   setGradient: function (colors, provinces, has_bar) {
-    var max = _.max(provinces, getNum)
-      , min = _.min(provinces, getNum)
-      , range =  max - min
-      , colorNum = colors.length
-      , parts = 1 / (colorNum - 1);
-    if (colorNum < 2) {
+    if (colors.length < 2 || provinces.length < 2) {
       return;
     }
-    colors.reverse();
+    var range = getGradientRange(provinces);
     if (has_bar) {
-      this.createColorBar(colors, max, min);
+      this.createColorBar(colors, range.max, range.min);
     }
-    colors = _.map(colors, function (color) {
-      return Raphael.color(color);
-    });
     this.areas.attr('fill', this.config.colors.muted);
+    colors = createGradientColors(colors, provinces, range);
     _.each(provinces, function (value, key) {
-      var num = getNum(value)
-        , diff = num - min
-        , percent = diff / range
-        , index = percent / parts >> 0
-        , color1 = colors[index]
-        , color2 = colors[index + 1]
-        , color  = {};
-      if (!color2) {
-        color = color1;
-      } else {
-        percent = percent % parts / parts;
-        color.r = getBetweenColor(color2.r, color1.r, percent);
-        color.g = getBetweenColor(color2.g, color1.g, percent);
-        color.b = getBetweenColor(color2.b, color1.b, percent);
-      }
-      color = Raphael.rgb(color.r, color.g, color.b);
       if (isNaN(value)) {
-        value.fill = color;
-        this.addGroup(value);
+        var options = _.omit(value, 'provinces');
+        options.fill = colors[key];
+        options.label = key;
+        this.addGroup(options, _.keys(value.provinces));
       } else {
         this.provinces[key].num = value;
-        this.provinces[key].color = color;
-        this.el.getById(this.provinces[key].eid).attr('fill', color);
+        this.provinces[key].color = colors[key];
+        this.el.getById(this.provinces[key].eid).attr('fill', colors[key]);
       }
     }, this);
   },
