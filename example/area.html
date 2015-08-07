@@ -53,8 +53,9 @@
 <script src="../bower_components/underscore/underscore-min.js"></script>
 <script src="../bower_components/handlebars/handlebars.min.js"></script>
 <script src="../js/utils.js"></script>
-<script src="../js/MeatMap.js"></script>
 <script src="../js/Tip.js"></script>
+<script src="../js/ColorBar.js"></script>
+<script src="../js/MeatMap.js"></script>
 <script src="../js/config.js"></script>
 <script src="../js/event.js"></script>
 <script>
@@ -87,16 +88,19 @@
       shanghai: 500
     };
   map.once('ready', function () {
-    map.setGradient(['#CC0000', '#FF9999', '#FFDC00'], nums, true);
+    var colors = map.setGradient(['#CC0000', '#FF9999', '#FFDC00'], nums, true);
     console.log(map.provinces);
     nums = _.map(nums, function (num, province) {
       if (isNaN(num)) {
-        return true;
+        num.color = colors[province];
+        num.label = province;
+        num.province = province;
+        return num;
       }
       return {
         num: num,
         province: province,
-        color: map.provinces[province].color,
+        color: colors[province],
         label: map.provinces[province].label
       };
     });
@@ -115,7 +119,7 @@
         }
       });
     map.mouseover(function (province) {
-      $('#' + province.id).addClass('active');
+      $('#' + (province.id || province.label)).addClass('active');
     });
     map.mouseout(function () {
       $('.active').removeClass('active');

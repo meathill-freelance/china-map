@@ -13,7 +13,8 @@ var Map = function (options) {
 
 Map.prototype = {
   areas: null,
-  groups: [],
+  colors: null,
+  groups: null,
   render: function () {
     var self = this
       , provinces = {}
@@ -49,6 +50,7 @@ Map.prototype = {
       this.labels.toFront();
     }
     this.provinces = provinces;
+    this.groups = [this.areas];
     this.fit();
   },
   addGroup: function (options) {
@@ -57,25 +59,18 @@ Map.prototype = {
     _.map(province_ids, function (id) {
       provinces.push(this.el.getById(this.provinces[id].eid));
     }, this);
-    if (!options.parent) {
+    if (!options.parent || options.parent === this.areas) {
       provinces.attr(options);
+    }
+    if (options.not_really) { // 不是真的要创建新的组
+      return;
     }
     provinces.options = options;
     this.groups.push(provinces);
     return provinces;
   },
   createColorBar: function (colors, max, min) {
-    this.el.setStart();
-    var box = this.areas.getBBox()
-      , bar = this.el.rect(box.width - 20, box.height - 180, 20, 160);
-    bar.attr({
-      fill: '270-' + colors.join('-'),
-      stroke: 0
-    });
-    this.el.text(box.width, box.height - 190, max);
-    this.el.text(box.width, box.height - 10, min);
-    this.colorBar = this.el.setFinish();
-    this.colorBar.attr('text-anchor', 'end');
+    return new ColorBar(colors, max, min, this.el, this.areas.getBBox());
   },
   createMask: function () {
     var mask = this.el.rect(0, 0, this.width, this.height);
@@ -98,8 +93,8 @@ Map.prototype = {
     }
   },
   findGroup: function (target) {
-    return _.find(this.groups, function (group) {
-      if (this.group === group) {
+    return _.find(this.groups, function (group, index) {
+      if (this.group === group || index === 0) {
         return false;
       }
       for (var i = 0, len = group.length; i < len; i++) {
@@ -115,8 +110,14 @@ Map.prototype = {
     this.el.setViewBox(0, 0, box.width, box.height);
   },
   highlight: function (province) {
-    province = this.el.getById(this.provinces[province].eid);
-    province.toFront();
+    if (province in this.provinces) {
+      province = this.el.getById(this.provinces[province].eid);
+      province.toFront();
+    } else {
+      province = _.find(this.groups, function (group) {
+        return group.options.label === province;
+      });
+    }
     return province.glow({
       color: '#FFF',
       width: 16,
@@ -126,44 +127,52 @@ Map.prototype = {
   loadMapSource: function () {
     $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
   },
-  setGradient: function (colors, provinces, has_bar) {
+  setGradient: function (colors, provinces, has_bar, to_body) {
     if (colors.length < 2 || provinces.length < 2) {
       return;
     }
+    this.colors = colors;
     var range = getGradientRange(provinces);
     if (has_bar) {
-      this.createColorBar(colors, range.max, range.min);
+      this.colorBar = this.createColorBar(colors, range.max, range.min);
     }
     this.areas.attr('fill', this.config.colors.muted);
     colors = createGradientColors(colors, provinces, range);
+    to_body = _.isUndefined(to_body) ? true : false;
     _.each(provinces, function (value, key) {
       if (isNaN(value)) {
-        var options = _.omit(value, 'provinces');
-        options.fill = colors[key];
-        options.label = key;
-        this.addGroup(options, _.keys(value.provinces));
+        value.parent = !value.parent && to_body ? this.areas : value.parent;
+        value.fill = colors[key];
+        value.label = key;
+        value.not_really = !to_body;
+        this.addGroup(value, _.keys(value.provinces));
+        if (to_body) {
+          this.areas.options = {provinces: provinces};
+        }
       } else {
         this.provinces[key].num = value;
         this.provinces[key].color = colors[key];
         this.el.getById(this.provinces[key].eid).attr('fill', colors[key]);
       }
     }, this);
+    return colors;
   },
   area_clickHandler: function (event) {
     var box;
     // 点击了黑色蒙版
     if (this.mask && event.target === this.mask.node && this.group) {
       var parent = this.group.options.parent;
-      if (parent) {
+      if (parent === this.areas) {
+        this.fit();
+        this.mask.hide();
+        this.group = null;
+      } else {
         box = parent.getBBox();
         this.el.setViewBox(box.x, box.y, box.width, box.height);
         parent.toFront();
         this.group = parent;
-      } else {
-        this.fit();
-        this.mask.hide();
-        this.group = null;
       }
+      this.setGradient(this.colors, parent.options.provinces, false, false);
       return true;
     }
 
@@ -176,13 +185,21 @@ Map.prototype = {
       this.mask.show();
       this.mask.toFront();
       group.toFront();
-      _.chain(this.groups)
-        .filter(function (item) {
-          return item.options.parent === group
-        })
-        .each(function (group) {
-          group.attr(group.options);
-        });
+      if (group.options.provinces) {
+        if (this.colorBar) {
+          this.colorBar.toFront();
+        }
+        this.setGradient(this.colors, group.options.provinces, false, false);
+      } else {
+        _.chain(this.groups)
+          .filter(function (item) {
+            return item.options.parent === group
+          })
+          .each(function (group) {
+            group.attr(group.options);
+          });
+      }
+
       return true;
     }
 
