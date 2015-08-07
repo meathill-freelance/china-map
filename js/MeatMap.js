@@ -127,7 +127,7 @@ Map.prototype = {
   loadMapSource: function () {
     $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
   },
-  setGradient: function (colors, provinces, has_bar, to_body) {
+  setGradient: function (colors, provinces, parent, has_bar) {
     if (colors.length < 2 || provinces.length < 2) {
       return;
     }
@@ -138,15 +138,14 @@ Map.prototype = {
     }
     this.areas.attr('fill', this.config.colors.muted);
     colors = createGradientColors(colors, provinces, range);
-    to_body = _.isUndefined(to_body) ? true : false;
+    parent = parent || this.areas;
     _.each(provinces, function (value, key) {
       if (isNaN(value)) {
-        value.parent = !value.parent && to_body ? this.areas : value.parent;
         value.fill = colors[key];
         value.label = key;
-        value.not_really = !to_body;
+        value.parent = parent;
         this.addGroup(value, _.keys(value.provinces));
-        if (to_body) {
+        if (parent === this.areas) {
           this.areas.options = {provinces: provinces};
         }
       } else {
@@ -172,7 +171,7 @@ Map.prototype = {
         parent.toFront();
         this.group = parent;
       }
-      this.setGradient(this.colors, parent.options.provinces, false, false);
+      this.setGradient(this.colors, parent.options.provinces, parent);
       return true;
     }
 
@@ -189,7 +188,7 @@ Map.prototype = {
         if (this.colorBar) {
           this.colorBar.toFront();
         }
-        this.setGradient(this.colors, group.options.provinces, false, false);
+        this.setGradient(this.colors, group.options.provinces, group);
       } else {
         _.chain(this.groups)
           .filter(function (item) {

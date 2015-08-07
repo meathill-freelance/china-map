@@ -88,7 +88,7 @@
       shanghai: 500
     };
   map.once('ready', function () {
-    var colors = map.setGradient(['#CC0000', '#FF9999', '#FFDC00'], nums, true);
+    var colors = map.setGradient(['#CC0000', '#FF9999', '#FFDC00'], nums, null, true);
     console.log(map.provinces);
     nums = _.map(nums, function (num, province) {
       if (isNaN(num)) {
