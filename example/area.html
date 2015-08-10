@@ -110,13 +110,10 @@
       .html(template({provinces: nums}))
       .on('mouseover', '.col-md-4', function (event) {
         var province = event.currentTarget.id;
-        event.currentTarget.glow = map.highlight(province);
+        map.highlight(province);
       })
       .on('mouseout', '.col-md-4', function (event) {
-        if (event.currentTarget.glow) {
-          event.currentTarget.glow.remove();
-          event.currentTarget.glow = null;
-        }
+        map.highlightOff();
       });
     map.mouseover(function (province) {
       $('#' + (province.id || province.label)).addClass('active');

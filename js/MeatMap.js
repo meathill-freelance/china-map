@@ -113,16 +113,26 @@ Map.prototype = {
     if (province in this.provinces) {
       province = this.el.getById(this.provinces[province].eid);
       province.toFront();
+      province.node.classList.add('active');
     } else {
       province = _.find(this.groups, function (group) {
         return group.options.label === province;
       });
+      province.forEach(function (item) {
+        item.node.classList.add('active');
+      });
     }
-    return province.glow({
-      color: '#FFF',
-      width: 16,
-      opacity: 0.75
-    });
+    this.highlightArea = province;
+    return this.highlightArea;
+  },
+  highlightOff: function () {
+    if (this.highlightArea.node) {
+      this.highlightArea.node.classList.remove('active');
+    } else {
+      this.highlightArea.forEach(function (item) {
+        item.node.classList.remove('active');
+      });
+    }
   },
   loadMapSource: function () {
     $.get(this.config.asset, $.proxy(this.mapSource_fetchedHandler, this), 'html');
