@@ -115,9 +115,9 @@ Map.prototype = {
       province.toFront();
       province.node.classList.add('active');
     } else {
-      province = _.find(this.groups, function (group) {
+      province = _.isString(province) ? _.find(this.groups, function (group) {
         return group.options.label === province;
-      });
+      }) :  province;
       province.forEach(function (item) {
         item.node.classList.add('active');
       });
@@ -229,6 +229,7 @@ Map.prototype = {
       , group = this.findGroup(target);
     if (group) {
       data = group.options;
+      this.highlight(group);
     } else {
       var province = target.classList[0];
       data = this.provinces[province];
@@ -241,6 +242,7 @@ Map.prototype = {
   },
   area_mouseOutHandler: function () {
     this.tip.remove();
+    this.highlightOff();
     eve('mouseout', this);
   },
   mapSource_fetchedHandler: function (svg) {
