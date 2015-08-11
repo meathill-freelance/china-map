@@ -112,6 +112,9 @@ Map.prototype = {
   highlight: function (province) {
     if (province in this.provinces) {
       province = this.el.getById(this.provinces[province].eid);
+      if (this.mask && $(province.node).index() < $(this.mask.node).index()) {
+        return;
+      }
       province.toFront();
       province.node.classList.add('active');
     } else {
