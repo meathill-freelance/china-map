@@ -62,7 +62,9 @@ Map.prototype = {
     if (!options.parent || options.parent === this.areas) {
       provinces.attr(options);
     }
-    if (options.not_really) { // 不是真的要创建新的组
+    if (_.find(this.groups, function (group) {
+        return _.isEqual(group.items, provinces.items);
+      })) { // 不是真的要创建新的组
       return;
     }
     provinces.options = options;
@@ -129,6 +131,9 @@ Map.prototype = {
     return this.highlightArea;
   },
   highlightOff: function () {
+    if (!this.highlightArea) {
+      return;
+    }
     if (this.highlightArea.node) {
       this.highlightArea.node.classList.remove('active');
     } else {
@@ -189,8 +194,9 @@ Map.prototype = {
     }
 
     // 点击了某个大组
-    var group = this.group = this.findGroup(event.target);
+    var group = this.findGroup(event.target);
     if (group) {
+      this.group = group;
       box = group.getBBox();
       this.el.setViewBox(box.x, box.y, box.width, box.height, true);
       this.mask = this.mask || this.createMask();
