@@ -21,9 +21,7 @@
 
 1. [Raphael](http://raphaeljs.com/) 绘制SVG的主要框架
 2. [jQuery](http://jquery.com/) DOM事件和一些函数
-3. [eventemitter]() 用来生成事件，将来可能替换掉
-4. [underscore](http://underscorejs.org/) 对数组进行操作
-5. [handlebars](http://handlebarsjs.com/) 控制生成的tip
+3. [underscore](http://underscorejs.org/) 对数组进行操作
 
 ## 协议
 
