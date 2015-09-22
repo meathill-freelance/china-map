@@ -58,6 +58,15 @@ module.exports = function (grunt) {
           'js/event.js'
         ],
         dest: temp + 'class.js'
+      },
+      lib: {
+        src: [
+          'bower_components/jquery/dist/jquery.min.js',
+          'bower_components/raphael/raphael-min.js',
+          'bower_components/underscore/underscore-min.js',
+          'bower_components/handlebars/handlebars.min.js'
+        ],
+        dest: dist + 'js/lib.js'
       }
     },
     uglify: {
